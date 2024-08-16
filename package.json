@@ -1,0 +1,22 @@
+{
+  "name": "kgtubot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon bot.js",
+    "start": "node bot.js"
+  },
+  "author": "Untevskiy 22PIZHb",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "docx-parser": "^0.2.1",
+    "dotenv": "^16.4.5",
+    "git-filter-repo": "^0.0.30",
+    "googleapis": "^140.0.1",
+    "mammoth": "^1.8.0",
+    "node-telegram-bot-api": "^0.66.0",
+    "nodemon": "^3.1.4",
+    "xlsx": "^0.18.5"
+  }
+}
