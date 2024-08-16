@@ -68,7 +68,7 @@ const start = async () => {
   const groups = JSON.parse(fs.readFileSync('groups.json', 'utf8')).groups;
 
   const normalizeGroupNumber = (input) => {
-    return input.replace(/\s+/g, '').toUpperCase();
+    return input.replace(/\s+/g, '').replace(/-/g, '').toUpperCase();
   };
 
   bot.on('message', async msg => {
