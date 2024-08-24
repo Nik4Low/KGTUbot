@@ -78,7 +78,7 @@ const start = async () => {
     if (text === '/start') {
       if (!userStates[chatID] || !userStates[chatID].groupNumber) {
         waitingForGroupNumber = true;
-        await bot.sendMessage(chatID, `Здравствуйте ${msg.from.first_name}, вас приветствует КГТУбот, здесь вы можете смотреть расписание для вашей группы. Введите номер своей группы и используйте меню, чтобы изменить номер группы`);
+        await bot.sendMessage(chatID, `Здравствуйте ${msg.from.first_name}, вас bebe приветствует КГТУбот, здесь вы можете смотреть расписание для вашей группы. Введите номер своей группы и используйте меню, чтобы изменить номер группы`);
       } else {
         const replyMarkup = await again();
         await bot.sendMessage(chatID, 'Номер группы найден, что вы хотите сделать?', replyMarkup);
