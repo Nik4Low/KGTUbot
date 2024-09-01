@@ -14,7 +14,7 @@ const getSheetData = async (groupNumber, sheetName) => {
     scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly']
   });
 
-  const range = `${sheetName}!A1:E157`;
+  const range = `${sheetName}!A1:Q157`;
 
   try {
     const authClient = await auth.getClient();
