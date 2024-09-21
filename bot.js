@@ -5,6 +5,7 @@ const TelegramApi = require('node-telegram-bot-api');
 const { google } = require('googleapis');
 const sheets = google.sheets('v4');
 const fs = require('fs');
+const cron = require('node-cron');
 
 const bot = new TelegramApi(token, { polling: true });
 
@@ -44,13 +45,33 @@ const getSheetData = async (groupNumber, sheetName) => {
   }
 };
 
+const sendDailySchedule = async () => {
+  const sheetName = 'CurrentSchedule';
+
+  for (const chatID in userStates) {
+    const userState = userStates[chatID];
+    if (userState && userState.groupNumber) {
+      const schedule = await getSheetData(userState.groupNumber, sheetName);
+      if (schedule) {
+        const formattedSchedule = formatSchedule(schedule);
+        await bot.sendMessage(chatID, `Доброе утро! Расписание для группы ${userState.groupNumber} на сегодня:\n${formattedSchedule}`, { parse_mode: 'Markdown' });
+      } else {
+        await bot.sendMessage(chatID, `Доброе утро! Расписание для группы ${userState.groupNumber} на сегодня не найдено.`);
+      }
+    }
+  }
+};
+
+cron.schedule('0 8 * * *', sendDailySchedule);
+
 const again = async () => {
   return {
     reply_markup: JSON.stringify({
       inline_keyboard: [
         [{ text: 'Расписание на сегодня', callback_data: '/today' }],
         [{ text: 'Расписание на завтра', callback_data: '/tomorrow' }],
-        [{ text: 'Расписание на неделю', callback_data: '/week' }]
+        [{ text: 'Расписание на неделю', callback_data: '/week' }],
+          [{text: 'Расписание на след. неделю', callback_data: '/next_week'}]
       ]
     })
   };
@@ -114,6 +135,8 @@ const start = async () => {
       sheetName = 'TomorrowSchedule';
     } else if (data === '/week') {
       sheetName = 'CurrentWeek';
+    } else if (data === '/next_week') {
+      sheetName = 'WeekLow';
     } else {
       await bot.answerCallbackQuery(callbackQueryId, { text: 'Неизвестная команда' });
       return;
@@ -124,10 +147,10 @@ const start = async () => {
       const schedule = await getSheetData(userState.groupNumber, sheetName);
       const replyMarkup = await again();
       if (schedule) {
-        const formattedSchedule = data === '/week' ? formatWeekSchedule(schedule) : formatSchedule(schedule);
-        await bot.sendMessage(chatID, `Расписание для группы ${userState.groupNumber} на ${data === '/week' ? 'текущую неделю' : sheetName === 'TomorrowSchedule' ? 'завтра' : 'сегодня'}:\n${formattedSchedule}`, { parse_mode: 'Markdown', ...replyMarkup });
+        const formattedSchedule = data === '/week' || data === '/next_week' ? formatWeekSchedule(schedule) : formatSchedule(schedule);
+        await bot.sendMessage(chatID, `Расписание для группы ${userState.groupNumber} на ${data === '/week' ? 'текущую неделю' : data === '/next_week' ? 'следующую неделю' : sheetName === 'TomorrowSchedule' ? 'завтра' : 'сегодня'}:\n${formattedSchedule}`, { parse_mode: 'Markdown', ...replyMarkup });
       } else {
-        await bot.sendMessage(chatID, `Расписание для группы ${userState.groupNumber} на ${data === '/week' ? 'текущую неделю' : sheetName === 'TomorrowSchedule' ? 'завтра' : 'сегодня'} не найдено`, replyMarkup);
+        await bot.sendMessage(chatID, `Расписание для группы ${userState.groupNumber} на ${data === '/week' ? 'текущую неделю' : data === '/next_week' ? 'следующую неделю' : sheetName === 'TomorrowSchedule' ? 'завтра' : 'сегодня'} не найдено`, replyMarkup);
       }
     } else {
       await bot.sendMessage(chatID, 'Номер группы не найден. Пожалуйста, введите номер группы снова.');
